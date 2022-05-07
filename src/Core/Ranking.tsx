@@ -1,5 +1,5 @@
 ﻿import {forEach} from "react-bootstrap/ElementChildren";
-
+const exactMath = require('exact-math');
 export default class Ranking{
     private readonly rankingMatrix: number[][];
     constructor(rankingMatrix: number[][]) {
@@ -14,7 +14,7 @@ export default class Ranking{
             let criterion = 0;
             for (let i = 0; i < expertsCount; i++){
                 const sum = this.rankingMatrix[i].reduce((accumulator, rank) => accumulator + rank, 0);
-                criterion+= this.rankingMatrix[i][j] / sum;
+                criterion+= exactMath.div(this.rankingMatrix[i][j], sum);
             }
             res.push(criterion / expertsCount);
         }

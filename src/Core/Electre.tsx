@@ -1,10 +1,12 @@
 ﻿import CriteriaDirection from "../Constants/CriteriaDirection";
 import ElectreResult from "../Models/ElectreResult";
+import IndexType from "../Constants/IndexType";
+const exactMath = require('exact-math');
 
 export default class Electre{
     private readonly problemMatrix: number[][];
     private readonly criteriaDirections: CriteriaDirection[];
-    private criteriaWeights: number[];
+    private readonly criteriaWeights: number[];
     constructor(problemMatrix: number[][], criteriaWeights: number[], criteriaDirections: CriteriaDirection[]) {
         this.problemMatrix = problemMatrix;
         this.criteriaWeights = criteriaWeights;
@@ -21,7 +23,7 @@ export default class Electre{
             
             for (let alternativeToCompare = 0; alternativeToCompare < alternativesCount; alternativeToCompare++){
                 if (currentAlternative != alternativeToCompare && !paretoExcluded.some(x=> x == alternativeToCompare)) {
-                    const res = this.CompareAlternatives(currentAlternative, alternativeToCompare);
+                    const res = this.CompareAlternativesPareto(currentAlternative, alternativeToCompare);
                     if (res == -1){
                         paretoExcluded.push(alternativeToCompare);
                         continue;
@@ -36,7 +38,7 @@ export default class Electre{
         return Array.from({length: alternativesCount}, (_, i) => i).filter(x=> !paretoExcluded.some(exc => exc == x));
     }
     //0 = not comparable, -1 = first better, 1 = second better
-    private CompareAlternatives(alternative: number, compare: number) : number {
+    private CompareAlternativesPareto(alternative: number, compare: number) : number {
         const criteriaCount = this.problemMatrix.length;
         let firstBetter = 0;
         let secondBetter = 0;
@@ -84,7 +86,7 @@ export default class Electre{
                 }
                 const isMax = this.criteriaDirections[i] == CriteriaDirection.Max;
                 const best = isMax ? Math.max(...this.problemMatrix[i]) : Math.min(...this.problemMatrix[i]);
-                const current = this.problemMatrix[i][j] / best;
+                const current = isMax ? exactMath.div(this.problemMatrix[i][j], best) : exactMath.div(best, this.problemMatrix[i][j]);
                 result[i].push(current);
             }
         }
@@ -95,12 +97,52 @@ export default class Electre{
         debugger
         const paretoOptimal = this.GetParetoOptimal();
         const transformedMatrix = this.TransformMatrix(paretoOptimal);
+        const agreementMatrix = this.CalculateIndexMatrix(transformedMatrix, IndexType.Agreement);
+        const disAgreementMatrix = this.CalculateIndexMatrix(transformedMatrix, IndexType.Disagreement);
+        
         return {
             optimalAlternativesIndxs: [],
             paretoOptimalIndxs: paretoOptimal,
             transformedAlternativesCompareMatrix: transformedMatrix,
-            agreementMatrix: [],
-            disagreementMatrix: [],
+            agreementMatrix: agreementMatrix,
+            disagreementMatrix: disAgreementMatrix,
         }
+    }
+    
+    private CalculateIndex(first: number, second: number, matrix: number[][], indexType: IndexType): number {
+        const criteriaCount = matrix.length;
+        let index = indexType == IndexType.Agreement ? 0 : Number.MIN_VALUE;
+        for (let i = 0; i < criteriaCount; i++){
+            const firstCriterion = matrix[i][first];
+            const secondCriterion = matrix[i][second];
+            switch (indexType) {
+                case IndexType.Agreement:
+                    if (firstCriterion >= secondCriterion){
+                        index = exactMath.add(index, this.criteriaWeights[i]);
+                    }
+                    break;
+                case IndexType.Disagreement:
+                    if (firstCriterion <= secondCriterion){
+                        const d =  exactMath.sub(secondCriterion, firstCriterion);
+                        index = Math.max(index, d);
+                    }
+                    break;
+                default:
+                     throw new RangeError();
+            }
+        }
+        
+        return index;
+    }
+    
+    private CalculateIndexMatrix(matrix: number[][], indexType: IndexType): number[][] {
+        const alternativesCount = matrix[0].length;
+        const result = new Array(alternativesCount).fill(null).map( _ => new Array(alternativesCount));
+        for (let i = 0; i <  alternativesCount; i++){
+            for (let j = 0; j < alternativesCount; j++){
+                result[i][j] = i == j ? null : this.CalculateIndex(i, j, matrix, indexType);
+            }
+        }
+        return result;
     }
 }
