@@ -12,6 +12,7 @@ import CriteriaDirectionsForm from "./Components/CriteriaDirections/CriteriaDire
 import CriteriaDirection from "./Constants/CriteriaDirection";
 import ChangeArrayLength from "./Helpers/ChangeArrayLength";
 import Electre from "./Core/Electre";
+import Ranking from "./Core/Ranking";
 
 
 function App() {
@@ -27,7 +28,7 @@ function App() {
   });
   
   const [taskMatrix, setTaskMatrix] = useState<number[][]>(new Array(taskDimensions.criteriesCount).fill(null).map(()=> new Array(taskDimensions.alternativesCount).fill(undefined)));
-  const [rankMatrix, setRankMatrix] = useState<number[][]>(new Array(taskDimensions.criteriesCount).fill(null).map(()=> new Array(taskDimensions.expertsCount).fill(undefined)));
+  const [rankMatrix, setRankMatrix] = useState<number[][]>(new Array(taskDimensions.expertsCount).fill(null).map(()=> new Array(taskDimensions.criteriesCount).fill(undefined)));
   const [criteriaDirections, setCriteriaDirections] = useState<CriteriaDirection[]>(new Array(taskDimensions.criteriesCount).fill(CriteriaDirection.Max));  
   const dimensionsCallback = (dimensions: TaskDimensions) => {
     setTaskDimensions({
@@ -36,7 +37,7 @@ function App() {
       expertsCount: dimensions.expertsCount
     });
     setTaskMatrix(x => ChangeMatrixDimensions(x, dimensions.criteriesCount, dimensions.alternativesCount));
-    setRankMatrix(x => ChangeMatrixDimensions(x, dimensions.criteriesCount, dimensions.expertsCount));
+    setRankMatrix(x => ChangeMatrixDimensions(x, dimensions.expertsCount, dimensions.criteriesCount));
     setCriteriaDirections(x => ChangeArrayLength(x, dimensions.criteriesCount, CriteriaDirection.Max));
   }
 
@@ -66,7 +67,15 @@ function App() {
       return;
     }
     
-    const electreSolver = new Electre(taskMatrix, rankMatrix, criteriaDirections);
+    if(rankMatrix && rankMatrix.some(x=> x.some(y => y == 0))){
+      toast.error("Ранг не может быть равен 0");
+      return;
+    }
+    
+    debugger
+    const ranking = new Ranking(rankMatrix);
+    const weights = ranking.CalculateWeights();
+    const electreSolver = new Electre(taskMatrix, weights, criteriaDirections);
     electreSolver.Solve(taskConstraints.minAgreementIndex, taskConstraints.maxDisagreementIndex);
     
   }

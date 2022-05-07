@@ -1,13 +1,13 @@
 ﻿import CriteriaDirection from "../Constants/CriteriaDirection";
-import Constants from "../Constants/Constants";
+import ElectreResult from "../Models/ElectreResult";
 
 export default class Electre{
     private readonly problemMatrix: number[][];
     private readonly criteriaDirections: CriteriaDirection[];
-    private rankingMatrix: number[][];
-    constructor(problemMatrix: number[][], rankingMatrix: number[][], criteriaDirections: CriteriaDirection[]) {
+    private criteriaWeights: number[];
+    constructor(problemMatrix: number[][], criteriaWeights: number[], criteriaDirections: CriteriaDirection[]) {
         this.problemMatrix = problemMatrix;
-        this.rankingMatrix = rankingMatrix;
+        this.criteriaWeights = criteriaWeights;
         this.criteriaDirections = criteriaDirections;
     }
     
@@ -21,7 +21,6 @@ export default class Electre{
             
             for (let alternativeToCompare = 0; alternativeToCompare < alternativesCount; alternativeToCompare++){
                 if (currentAlternative != alternativeToCompare && !paretoExcluded.some(x=> x == alternativeToCompare)) {
-                    
                     const res = this.CompareAlternatives(currentAlternative, alternativeToCompare);
                     if (res == -1){
                         paretoExcluded.push(alternativeToCompare);
@@ -73,10 +72,35 @@ export default class Electre{
         
         return 0;
     }
+
+    private TransformMatrix(paretoOptimal: number[]): number[][] {
+        const criteriaCount = this.problemMatrix.length;
+        const alternativesCount = this.problemMatrix[0].length;
+        const result = new Array(criteriaCount).fill(undefined).map(_ => new Array<number>());
+        for (let i = 0; i < criteriaCount; i++){
+            for (let j = 0; j < alternativesCount; j++){
+                if (!paretoOptimal.some(x=> x == j)){
+                    continue;
+                }
+                const isMax = this.criteriaDirections[i] == CriteriaDirection.Max;
+                const best = isMax ? Math.max(...this.problemMatrix[i]) : Math.min(...this.problemMatrix[i]);
+                const current = this.problemMatrix[i][j] / best;
+                result[i].push(current);
+            }
+        }
+        return result;
+    }
     
-    public Solve(minAgreementIndex: number, maxDisagreementIndex: number){
-        
+    public Solve(minAgreementIndex: number, maxDisagreementIndex: number) : ElectreResult{
         debugger
         const paretoOptimal = this.GetParetoOptimal();
+        const transformedMatrix = this.TransformMatrix(paretoOptimal);
+        return {
+            optimalAlternativesIndxs: [],
+            paretoOptimalIndxs: paretoOptimal,
+            transformedAlternativesCompareMatrix: transformedMatrix,
+            agreementMatrix: [],
+            disagreementMatrix: [],
+        }
     }
 }
