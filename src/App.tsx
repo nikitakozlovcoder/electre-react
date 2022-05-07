@@ -13,6 +13,9 @@ import CriteriaDirection from "./Constants/CriteriaDirection";
 import ChangeArrayLength from "./Helpers/ChangeArrayLength";
 import Electre from "./Core/Electre";
 import Ranking from "./Core/Ranking";
+import {CreateDefinition} from "./Helpers/DataGridDefinitions";
+import ElectreResult from "./Models/ElectreResult";
+import ProblemOutput from "./Components/ProblemOutput/ProblemOutput";
 
 
 function App() {
@@ -26,7 +29,8 @@ function App() {
     minAgreementIndex: 0,
     maxDisagreementIndex: 0
   });
-  
+  const [electreResult, setElectreResult] = useState<ElectreResult>();
+  const [criteriaWeights, setCriteriaWeights] = useState<number[]>();
   const [taskMatrix, setTaskMatrix] = useState<number[][]>(new Array(taskDimensions.criteriesCount).fill(null).map(()=> new Array(taskDimensions.alternativesCount).fill(undefined)));
   const [rankMatrix, setRankMatrix] = useState<number[][]>(new Array(taskDimensions.expertsCount).fill(null).map(()=> new Array(taskDimensions.criteriesCount).fill(undefined)));
   const [criteriaDirections, setCriteriaDirections] = useState<CriteriaDirection[]>(new Array(taskDimensions.criteriesCount).fill(CriteriaDirection.Max));  
@@ -76,7 +80,8 @@ function App() {
     const ranking = new Ranking(rankMatrix);
     const weights = ranking.CalculateWeights();
     const electreSolver = new Electre(taskMatrix, weights, criteriaDirections);
-    electreSolver.Solve(taskConstraints.minAgreementIndex, taskConstraints.maxDisagreementIndex);
+    setCriteriaWeights(weights);
+    setElectreResult(electreSolver.Solve(taskConstraints.minAgreementIndex, taskConstraints.maxDisagreementIndex))
     
   }
   const handleCriteriesDirection = (directions: CriteriaDirection[]) =>{
@@ -92,10 +97,11 @@ function App() {
           <h4 className="mt-5 text-start">Направления критериев</h4>
           <CriteriaDirectionsForm criteries={criteriaDirections} criteriesCallback={handleCriteriesDirection}/>
           <h4 className="mt-5 text-start">Сравнение альтернатив</h4>
-          <DataGrid data={taskMatrix} editable={true} handler={handleTaskMatrix}/>
+          <DataGrid data={taskMatrix} editable={true} handler={handleTaskMatrix} columnDefinitions={CreateDefinition(taskMatrix[0].length , "A")} rowsDefinitions={CreateDefinition(taskMatrix.length, "K")}/>
           <h4 className="mt-5 text-start">Ранги</h4>
-          <DataGrid data={rankMatrix} editable={true} handler={handleRankMatrix}/>
+          <DataGrid data={rankMatrix} editable={true} handler={handleRankMatrix} min={0}  columnDefinitions={CreateDefinition(rankMatrix[0].length, "K")} rowsDefinitions={CreateDefinition(rankMatrix.length, "E")}/>
           <button type="submit" className="btn btn-primary w-100" onClick={solveProblem}>Решить</button>
+          {criteriaWeights && electreResult ? <ProblemOutput electreResult={electreResult} weights={criteriaWeights}/> : null}
         </div>
       </>
   );

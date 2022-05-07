@@ -22,12 +22,12 @@ export default function TaskConstraintsForm({taskConstraints, constraintsCallbac
         <form className="row mt-1">
             <div className="form-group col-3">
                 <label>Минимальный идекс согласия</label>
-                <input type="number" className="form-control" value={taskConstraints.minAgreementIndex} onChange={handleAgreement}/>
+                <input type="number" min={0} max={1} step={0.1} className="form-control" value={taskConstraints.minAgreementIndex} onChange={handleAgreement}/>
             </div>
 
             <div className="form-group col-3">
                 <label>Максимальный индекс несогласия</label>
-                <input type="number" className="form-control" value={taskConstraints.maxDisagreementIndex} onChange={handleDisagreement}/>
+                <input type="number" min={0} max={1} step={0.1} className="form-control" value={taskConstraints.maxDisagreementIndex} onChange={handleDisagreement}/>
             </div>
         </form>
     )

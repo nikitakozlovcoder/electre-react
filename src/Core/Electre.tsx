@@ -99,9 +99,15 @@ export default class Electre{
         const transformedMatrix = this.TransformMatrix(paretoOptimal);
         const agreementMatrix = this.CalculateIndexMatrix(transformedMatrix, IndexType.Agreement);
         const disAgreementMatrix = this.CalculateIndexMatrix(transformedMatrix, IndexType.Disagreement);
+        const optimalAlternatives = this.GetOptimalAlternatives(
+            agreementMatrix, 
+            disAgreementMatrix, 
+            minAgreementIndex, 
+            maxDisagreementIndex,
+            paretoOptimal);
         
         return {
-            optimalAlternativesIndxs: [],
+            optimalAlternativesIndxs: optimalAlternatives,
             paretoOptimalIndxs: paretoOptimal,
             transformedAlternativesCompareMatrix: transformedMatrix,
             agreementMatrix: agreementMatrix,
@@ -144,5 +150,23 @@ export default class Electre{
             }
         }
         return result;
+    }
+
+    private GetOptimalAlternatives(agreementMatrix: number[][],
+                                   disAgreementMatrix: number[][],
+                                   minAgreementIndex: number,
+                                   maxDisagreementIndex: number,
+                                   paretoOptimal: number[]) : number[] {
+        const alternativesCount = agreementMatrix.length;
+        const core = [];
+        for (let i = 0; i < alternativesCount; i++){
+            const minAgreement = Math.min(...agreementMatrix[i].filter(x=> x !== null && x !== undefined))
+            const maxDisagreement = Math.max(...disAgreementMatrix[i].filter(x=> x !== null && x !== undefined)) 
+            if (minAgreement > minAgreementIndex && maxDisagreement < maxDisagreementIndex) {
+                core.push(paretoOptimal[i]);
+            } 
+        }
+        
+        return core;
     }
 }
