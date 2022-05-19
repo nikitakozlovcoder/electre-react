@@ -90,7 +90,7 @@ function App() {
           <TaskConstraintsForm taskConstraints={taskConstraints} constraintsCallback={constraintsCallback}/>
           <h4 className="mt-5 text-start">Направления критериев</h4>
           <CriteriaDirectionsForm criteries={criteriaDirections} criteriesCallback={handleCriteriesDirection}/>
-          <h4 className="mt-5 text-start">Сравнение альтернатив</h4>
+          <h4 className="mt-5 text-start">Оценки альтернатив по критериям</h4>
           <DataGrid data={taskMatrix} editable={true} handler={handleTaskMatrix} columnDefinitions={CreateDefinition(taskMatrix[0].length , "A")} rowsDefinitions={CreateDefinition(taskMatrix.length, "K")}/>
           <h4 className="mt-5 text-start">Ранги</h4>
           <DataGrid data={rankMatrix} editable={true} handler={handleRankMatrix} min={1}  columnDefinitions={CreateDefinition(rankMatrix[0].length, "K")} rowsDefinitions={CreateDefinition(rankMatrix.length, "E")}/>
