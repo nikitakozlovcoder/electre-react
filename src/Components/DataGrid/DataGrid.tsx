@@ -13,6 +13,13 @@ export  interface DataGridProps {
 export default function DataGrid({data, columnDefinitions, rowsDefinitions, editable, handler, min, max} : DataGridProps){
     const handleInput = (e: React.ChangeEvent<HTMLInputElement>, row: number, col: number) => {
         if (handler) {
+            if (min != null &&  Number(e.target.value) < min){
+                return;
+            }
+            
+            if (max != null &&  Number(e.target.value) > max){
+                return;
+            }
             handler(data.map((x, i) => x.map((y, j) => i == row && j == col ? Number(e.target.value) : y)));
         }
     }
