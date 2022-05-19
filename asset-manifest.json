@@ -1,15 +1,15 @@
 {
   "files": {
     "main.css": "/electre-react/static/css/main.9b3b55f0.css",
-    "main.js": "/electre-react/static/js/main.7638c6e1.js",
+    "main.js": "/electre-react/static/js/main.a6fc4bbb.js",
     "static/js/787.c1112931.chunk.js": "/electre-react/static/js/787.c1112931.chunk.js",
     "index.html": "/electre-react/index.html",
     "main.9b3b55f0.css.map": "/electre-react/static/css/main.9b3b55f0.css.map",
-    "main.7638c6e1.js.map": "/electre-react/static/js/main.7638c6e1.js.map",
+    "main.a6fc4bbb.js.map": "/electre-react/static/js/main.a6fc4bbb.js.map",
     "787.c1112931.chunk.js.map": "/electre-react/static/js/787.c1112931.chunk.js.map"
   },
   "entrypoints": [
     "static/css/main.9b3b55f0.css",
-    "static/js/main.7638c6e1.js"
+    "static/js/main.a6fc4bbb.js"
   ]
 }
