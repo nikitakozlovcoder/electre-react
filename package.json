@@ -1,5 +1,6 @@
 {
   "name": "app",
+  "homepage": "https://nikitakozlovcoder.github.io/electre-react",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -13,6 +14,7 @@
     "@types/react-dom": "^18.0.3",
     "bootstrap": "^5.1.3",
     "exact-math": "^2.2.3",
+    "gh-pages": "^4.0.0",
     "react": "^18.1.0",
     "react-bootstrap": "^2.3.1",
     "react-column-resizer": "^1.1.9",
@@ -23,6 +25,8 @@
     "web-vitals": "^2.1.4"
   },
   "scripts": {
+    "predeploy": "npm run build",
+    "deploy": "gh-pages -d build",
     "start": "react-scripts start",
     "build": "react-scripts build",
     "test": "react-scripts test",

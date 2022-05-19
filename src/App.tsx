@@ -71,12 +71,6 @@ function App() {
       return;
     }
     
-    if(rankMatrix && rankMatrix.some(x=> x.some(y => y == 0))){
-      toast.error("Ранг не может быть равен 0");
-      return;
-    }
-    
-    debugger
     const ranking = new Ranking(rankMatrix);
     const weights = ranking.CalculateWeights();
     const electreSolver = new Electre(taskMatrix, weights, criteriaDirections);
@@ -99,7 +93,7 @@ function App() {
           <h4 className="mt-5 text-start">Сравнение альтернатив</h4>
           <DataGrid data={taskMatrix} editable={true} handler={handleTaskMatrix} columnDefinitions={CreateDefinition(taskMatrix[0].length , "A")} rowsDefinitions={CreateDefinition(taskMatrix.length, "K")}/>
           <h4 className="mt-5 text-start">Ранги</h4>
-          <DataGrid data={rankMatrix} editable={true} handler={handleRankMatrix} min={0}  columnDefinitions={CreateDefinition(rankMatrix[0].length, "K")} rowsDefinitions={CreateDefinition(rankMatrix.length, "E")}/>
+          <DataGrid data={rankMatrix} editable={true} handler={handleRankMatrix} min={1}  columnDefinitions={CreateDefinition(rankMatrix[0].length, "K")} rowsDefinitions={CreateDefinition(rankMatrix.length, "E")}/>
           <button type="submit" className="btn btn-primary w-100" onClick={solveProblem}>Решить</button>
           {criteriaWeights && electreResult ? <ProblemOutput electreResult={electreResult} weights={criteriaWeights}/> : null}
         </div>
