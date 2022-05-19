@@ -3,9 +3,13 @@ import ElectreResult from "../Models/ElectreResult";
 import IndexType from "../Constants/IndexType";
 const exactMath = require('exact-math');
 
+//класс, представляет реализацию алгоритма ELECTRE
 export default class Electre{
+    //матрица альтернатив и критериев
     private readonly problemMatrix: number[][];
+    //направления оптимизации критериев
     private readonly criteriaDirections: CriteriaDirection[];
+    //веса критериев
     private readonly criteriaWeights: number[];
     constructor(problemMatrix: number[][], criteriaWeights: number[], criteriaDirections: CriteriaDirection[]) {
         this.problemMatrix = problemMatrix;
@@ -13,6 +17,7 @@ export default class Electre{
         this.criteriaDirections = criteriaDirections;
     }
     
+    //выявление Парето оптимального подмножества альтернатив
     private GetParetoOptimal(): number[]{
         const alternativesCount = this.problemMatrix[0].length;
         const paretoExcluded: number[] = [];
@@ -37,6 +42,7 @@ export default class Electre{
         }
         return Array.from({length: alternativesCount}, (_, i) => i).filter(x=> !paretoExcluded.some(exc => exc == x));
     }
+    
     //0 = not comparable, -1 = first better, 1 = second better
     private CompareAlternativesPareto(alternative: number, compare: number) : number {
         const criteriaCount = this.problemMatrix.length;
@@ -75,6 +81,7 @@ export default class Electre{
         return 0;
     }
 
+    //преобразование оценок альтернатив к безразмерному виду
     private TransformMatrix(paretoOptimal: number[]): number[][] {
         const criteriaCount = this.problemMatrix.length;
         const alternativesCount = this.problemMatrix[0].length;
@@ -92,13 +99,17 @@ export default class Electre{
         }
         return result;
     }
-    
+    //вычисление по методу ELECTRE
     public Solve(minAgreementIndex: number, maxDisagreementIndex: number) : ElectreResult{
-        debugger
+        //нахождение Парето оптимальных альтернатив
         const paretoOptimal = this.GetParetoOptimal();
+        //в матрице останутся только Парето оптимальные альтернативы с оценками, приведенными к безразмерному виду
         const transformedMatrix = this.TransformMatrix(paretoOptimal);
+        //матрица согласия
         const agreementMatrix = this.CalculateIndexMatrix(transformedMatrix, IndexType.Agreement);
+        //матрица несогласия
         const disAgreementMatrix = this.CalculateIndexMatrix(transformedMatrix, IndexType.Disagreement);
+        //оптимальные альтернативы
         const optimalAlternatives = this.GetOptimalAlternatives(
             agreementMatrix, 
             disAgreementMatrix, 
@@ -115,6 +126,7 @@ export default class Electre{
         }
     }
     
+    //подсчет индексов согласия/несогласия по критериям двух альтернатив
     private CalculateIndex(first: number, second: number, matrix: number[][], indexType: IndexType): number {
         const criteriaCount = matrix.length;
         let index = indexType == IndexType.Agreement ? 0 : Number.MIN_VALUE;
@@ -140,7 +152,8 @@ export default class Electre{
         
         return index;
     }
-    
+
+    //подсчет индексов согласия/несогласия
     private CalculateIndexMatrix(matrix: number[][], indexType: IndexType): number[][] {
         const alternativesCount = matrix[0].length;
         const result = new Array(alternativesCount).fill(null).map( _ => new Array(alternativesCount));
@@ -152,6 +165,7 @@ export default class Electre{
         return result;
     }
 
+    //получение ядра
     private GetOptimalAlternatives(agreementMatrix: number[][],
                                    disAgreementMatrix: number[][],
                                    minAgreementIndex: number,
